@@ -1,0 +1,50 @@
+version 1.0 基本完整版
+
+run_SAE_once(sparse + de-noising + 各种activation function )
+
+这个是基本版，都是别人的工作。接下来版本应该是自己改进
+
+main()
+|---load_MNIST_data(images_file, labels_file, preprocess, is_show_images) // for train
+|---load_MNIST_data(images_file, labels_file, preprocess, is_show_images) // for test
+|       |---load_MNIST_images(images_file, preprocess, is_show_images, varargin )
+|       |       |---whitening(data)
+|       |---load_MNIST_labels(labels_file)
+|
+|---get_SAE_option(preOption_SAE, varargin)
+|		|---get_AE_option(preOption_AE)
+|		|---get_BP_option(preOption_BP)
+|---get_BPNN_option(preOption_BPNN)
+|
+|---run_SAE_once(images_train, labels_train, images_test, labels_test, architecture, option_SAE, option_BPNN, is_disp_network, is_disp_info )
+|       |---train_SAE(input, output, architecture, preOption_SAE) // SAE
+|       |       |---init_parameters(architecture_AE) <----------------------------------------------------------------------+
+|       |		|---train_AE(input, theta_AE, architecture_AE, option_AE)                          						    |
+|       |		|		|---denoising_switch(input, count_AE, option_AE)                                    				|
+|       |		|		|---minFunc(fun, theta_AE, options)                                               					|
+|       |		|		|		|---calc_AE_batch(input, theta_AE, architecture_AE, option_AE, (input_corrupted,) ~)		|
+|		|		|		|---predict_NN(input, architecture_AE(1:2), theta_AE(W1,b1), option_AE)								|
+|		|		|																											|
+|		|		|------------------------------------- until train all stacked AE ------------------------------------------+
+|		|		|
+|       |		|---init_parameters(architecture_BP, last_active_is_softmax, varargin)
+|       |		|---train_BPNN(input, output, theta_BP, architecture_BP, option_BP)
+|       |		|		|---fun = @(x) calcBPBatch(input, output, x, architecture, option_BP)
+|       |		|		|---minFunc(fun, theta_BP, options)
+|		|
+|		|---display_network(W)
+|		|
+|       |---predict_NN(input, architecture, theta_SAE, preOption_BPNN)
+|       |---get_accuracy(predicted_labels, labels)
+|       |
+|       |---train_BPNN(input, output, theta_SAE, architecture, preOption_BPNN) // fine-tune
+|       |
+|       |---predict_NN(input, architecture, theta_SAE, preOption_BPNN)
+|       |---get_accuracy(predicted_labels, labels)
+|
+|
+end
+
+[784 400 200 10] + ReLu + sparse(rho = 0.1, beta = 0.3) + de-noising( mode = 'On_Off', rate = 0.15 ): 98+%, 1900s ;
+
+by 郑煜伟 Ewing 2016-04
